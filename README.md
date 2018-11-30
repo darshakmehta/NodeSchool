@@ -1,4 +1,4 @@
-# NodeSchool : Solutions learnyounode
+# [NodeSchool](https://nodeschool.io/) : Solutions learnyounode
 
 ## Takeaways:
 
@@ -26,7 +26,7 @@ b. `/path/to/your/program.js` file
 ### To find number of new lines in unix
 cat file | wc -l
 
-### To find number of new lines in unix
+### To find number of new lines in windows
 find /v /c "" file
 
 1. To perform a filesystem operation you are going to need the `fs` module from the Node core library.
@@ -52,3 +52,39 @@ where list is an array of filename strings.
 
 ## Exercise 6. MAKE IT MODULAR
 
+1. Create module.exports and require it in the main function.
+2. Call the `contract` function created to achieve the task
+
+## Exercise 7. HTTP CLIENT
+
+1. The http.get() method is a shortcut for simple GET requests, use it to simplify your solution. The first argument to http.get() can be the URL you want to GET; provide a callback as the second argument. Unlike other callback functions, this one has the signature: 
+
+`function callback (response) { /* ... */ }`
+
+Where the response object is a `Node Stream object`. You can treat Node Streams as objects that emit events. 
+
+The three events that are of most interest are: "data", "error" and "end". You listen to an event like so: 
+
+`response.on("data", function (data) { /* ... */ })`
+
+The "data" event is emitted when a chunk of data is available and can be processed. The size of the chunk depends upon the underlying data source.
+
+The response object / Stream that you get from http.get() also has a setEncoding() method. If you call this method with "utf8", the "data" events will emit Strings rather than the standard Node Buffer objects which you have to explicitly convert to Strings.
+
+## Exercise 8. HTTP COLLECT
+
+response.on("end") => To access whole data returned from server
+
+`/* Use third-party package
+ a: bl (Buffer List) b: concat-stream */`
+
+1. To install node package
+`npm install bl`
+
+2. Both bl and concat-stream can have a stream piped in to them and they will collect the data for you. Once the stream has ended, a callback will be fired with the data:
+
+`response.pipe(bl(function (err, data) { /* ... */ }))
+     // or
+response.pipe(concatStream(function (data) { /* ... */ }))`
+
+Note that you will probably need to data.toString() to convert from a Buffer.

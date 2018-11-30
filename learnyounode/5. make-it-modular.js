@@ -1,30 +1,31 @@
-//mymodule.js
+//module.js
 
-var fs = require('fs')
-var path = require('path')
+const fs = require('fs');
 
-module.exports = function(dir, filterStr, callback) {
+/* Program to return list of files in a given directory filtered by extension */
+module.exports = (directory, extension, callback) => {
 
-    fs.readdir(dir, function(err, list) {
-        if (err) return callback(err)
-        list = list.filter(function(file) {
-            return path.extname(file) === '.' + filterStr
-        })
+    fs.readdir(directory, (error, fileNameList) => {
+        if(error) return callback(error);
 
-        callback(null, list)
-    })
+        let list = filterList(extension, fileNameList);
+        
+        callback(null, list);
+    });
+}
+
+const filterList = (extension, list) => {
+    return list.filter((file) => file.includes("." + extension));
 }
 
 //program.js
-var filterFn = require('./mymodule.js')
-var dir = process.argv[2]
-var filterStr = process.argv[3]
 
-filterFn(dir, filterStr, function(err, list) {
-    if (err)
-        return console.error('There was an error:', err)
+const readDirectory = require('./module');
 
-    list.forEach(function(file) {
-        console.log(file)
-    })
-})
+const directory = process.argv[2];
+const extension = process.argv[3];
+
+readDirectory(directory, extension, (error, fileNameList) => {
+    if(error) console.log(error);
+    fileNameList.forEach((file) => console.log(file));
+});

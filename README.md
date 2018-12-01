@@ -124,3 +124,76 @@ To create the date, you'll need to create a custom format from a new Date() obje
      date.getMinutes()
 
 Or, if you want to be adventurous, use the strftime package from npm. The strftime(fmt, date) function takes date formats just like the unix date command. You can read more about strftime at: (https://github.com/samsonjs/strftime)
+
+## Exercise 11. HTTP FILE SERVER
+
+Because we need to create an HTTP server for this exercise rather than a generic TCP server, we should use the http module from Node core. Like the net module, http also has a method named `http.createServer()` but this one creates a server that can talk HTTP.
+
+`http.createServer()` takes a callback that is called once for each connection received by your server. The callback function has the signature:
+
+`function callback (request, response) { /* ... */ }`
+
+Where the two arguments are objects representing the HTTP request and the corresponding response for this request. request is used to fetch properties, such as the header and query-string from the request while response is for sending data to the client, both headers and body.
+
+Both request and response are also Node streams! Which means that you can use the streaming abstractions to send and receive data if they suit your use-case.
+
+http.createServer() also returns an instance of your server. You must call server.listen(portNumber) to start listening on a particular port.
+
+A typical Node HTTP server looks like this:
+
+	var http = require('http')
+	var server = http.createServer(function (req, res) {
+	// request handling logic...
+	})
+	server.listen(8000)
+
+The `fs` core module also has some streaming APIs for files. You will need to use the `fs.createReadStream()`method to create a stream representing the file you are given as a command-line argument. The method returns a stream object which you can use src.pipe(dst) to pipe the data from the src stream to the dst stream. In this way you can connect a filesystem stream with an HTTP response stream.
+
+## Exercise 12. HTTP UPPERCASERER
+
+While you're not restricted to using the streaming capabilities of the request and response objects, it will be much easier if you do.
+
+There are a number of different packages in npm that you can use to "transform" stream data as it's passing through. For this exercise the `through2-map` package offers the simplest API. 
+
+through2-map allows you to create a transform stream using only a single function that takes a chunk of data and returns a chunk of data. It's designed to work much like `Array#map()` but for streams:
+
+	var map = require('through2-map')
+	inStream.pipe(map(function (chunk) {
+	return chunk.toString().split('').reverse().join('')
+	})).pipe(outStream)
+
+In the above example, the incoming data from inStream is converted to a String (if it isn't already), the characters are reversed and the result is passed through to outStream. So we've made a chunk character reverser! 
+
+Remember though that the chunk size is determined up-stream and you have little control over it for incoming data.
+
+## Exercise 13. HTTP JSON API SERVER
+
+The request object from an HTTP server has a url property that you will need to use to "route" your requests for the two endpoints.
+
+You can parse the URL and query string using the Node core 'url' module. `url.parse(request.url, true)` will parse content of request.url and provide you with an object with helpful properties.
+
+For example, on the command prompt, type:
+
+`$ node -pe "require('url').parse('/test?q=1', true)"`
+  
+Your response should be in a JSON string format. Look at JSON.stringify() for more information.
+
+### You should also be a good web citizen and set the Content-Type properly:
+
+	res.writeHead(200, { 'Content-Type': 'application/json' })
+
+The JavaScript Date object can print dates in ISO format, e.g. new Date().toISOString(). It can also parse this format if you pass the string into the Date constructor. Date.getTime() will also come in handy.
+
+### Testing RegExp
+
+	const query1 = new RegExp(/^\/api\/parsetime/);
+	const query2 = new RegExp(/^\/api\/unixtime/);
+
+	if (query1.test(request.url))
+		result = parsetime(time);
+	else if (query2.test(request.url))
+		result = unixtime(time);
+
+### JSON.stringify()
+
+	response.end(JSON.stringify(result));
